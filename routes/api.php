@@ -4,7 +4,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TaskController;
-use App\Http\Controllers\GoogleAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,10 +19,6 @@ use App\Http\Controllers\GoogleAuthController;
 // Auth routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-
-// Google OAuth routes
-Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
-Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
 
 // Protected routes
 Route::middleware('auth:api')->group(function () {

@@ -45,20 +45,37 @@ class GoogleAuthController extends Controller
             // Generate JWT token
             $token = auth('api')->login($user);
             
-            return response()->json([
-                'message' => 'Successfully authenticated with Google',
-                'user' => $user,
-                'authorization' => [
-                    'token' => $token,
-                    'type' => 'bearer',
-                ]
-            ]);
+            // Check if this is an API request (from frontend)
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Successfully authenticated with Google',
+                    'user' => $user,
+                    'authorization' => [
+                        'token' => $token,
+                        'type' => 'bearer',
+                    ]
+                ]);
+            }
+            
+            // For web requests, redirect to frontend with token
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            $redirectUrl = $frontendUrl . '/auth/google/callback?token=' . $token . '&user=' . urlencode(json_encode($user));
+            
+            return redirect($redirectUrl);
             
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Google authentication failed',
-                'error' => $e->getMessage()
-            ], 500);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Google authentication failed',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+            
+            // For web requests, redirect to frontend with error
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            $redirectUrl = $frontendUrl . '/auth/google/callback?error=' . urlencode('Google authentication failed');
+            
+            return redirect($redirectUrl);
         }
     }
 }
